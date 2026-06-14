@@ -1,0 +1,281 @@
+openapi: 3.0.3
+
+info:
+  title: Orders API
+  description: Orders management API
+  version: 1.0.0
+
+servers:
+  - url: '{scheme}://{environment}:{port}/v1'
+    description: Deployment base path
+    variables:
+      scheme:
+        default: http
+        enum:
+          - http
+          - https
+      environment:
+        default: localhost
+        enum:
+          - localhost
+      port:
+        default: '8080'
+        enum:
+          - '8080'
+
+tags:
+  - name: orders
+    description: Operations that can be done in order to manage order creations, modifications and queries
+
+paths:
+  /orders:
+    get:
+      tags:
+        - orders
+      summary: Requests all the stored orders, containing the customer that requested it and all the products
+      operationId: getOrders
+      responses:
+        '200':
+          $ref: '#/components/responses/GetOrdersResponse'
+
+    post:
+      tags:
+        - users
+      summary: Requests the creation of a new customer order
+      operationId: createOrder
+      requestBody:
+        $ref: '#/components/requestBodies/CreateOrderRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateOrderResponse'
+
+  /orders/{id}:
+    get:
+      tags:
+        - users
+      summary: Requests a stored order by its unique and identifying ID
+      operationId: getUserById
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetOrderByIdResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundException'
+
+components:
+
+  parameters:
+    OrderId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+    CreateOrderRequest:
+      description: Request object used to create a new order
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateOrderRequest'
+
+  responses:
+    GetOrdersResponse:
+      description: Orders response that contains all stored orders
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetOrdersResponse'
+    CreateOrderResponse:
+      description: Order response as result of a new order creation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateOrderResponse'
+    GetOrderByIdResponse:
+      description: Order response that contains an unique element found by its unique and identifying ID
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderResponse'
+
+    # Exceptions
+    NotFoundException:
+      description: Element could not be found in the system
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ExceptionBase'
+              - type: object
+                properties:
+                  code:
+                    description: |-
+                      | Code              | Message                                 |
+                      | ----------------- | --------------------------------------- |
+                      | element_not_found | The searched element could not be found |
+
+
+  schemas:
+
+    # Exceptions
+    ExceptionBase:
+      description: Object that contains the base elements to create a new exception
+      type: object
+      properties:
+        httpCode:
+          description: HTTP Code used to define de thrown exception
+          type: integer
+          example: 404
+        message:
+          description: Descriptive message thrown to the user. It has to be human readable
+
+    # Enums
+    
+    # IDs
+    OrderId:
+      description: Order ID
+      type: string
+      example: "65f4f8b3e6f5e89a12345678"
+
+    
+    # Requests
+    CreateOrderRequest:
+      description: Request object used to create a new order
+      type: object
+      required:
+        - customer
+        - orderLines
+      properties:
+        customer:
+          $ref: '#/components/schemas/Customer'
+        orderLines:
+          description: Lines of the order
+          type: array
+          minItems: 1
+          maxItems: 999
+          items:
+            $ref: '#/components/schemas/OrderLine'
+
+
+    # Responses
+    GetOrdersResponse:
+      description: Response containing all the stored orders
+      type: object
+      properties:
+        orders:
+          description: List of stored orders
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+
+    CreateOrderResponse:
+      description: Response containing the stored order
+      allOf:
+        - $ref: '#/components/schemas/Order'
+
+    OrderResponse:
+      description: Response containing the found order by its ID
+      allOf:
+        - $ref: '#/components/schemas/Order'
+
+    # Complete objects
+    Order:
+      description: Complete order requested and registered with its unique and identifying ID
+      allOf:
+        - $ref: '#/components/schemas/CreateOrderRequest'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/OrderId'
+            totalPrice:
+              description: Total price of the order
+              type: number
+              format: double
+              minimum: 0.0
+              maximum: 999999.99
+              example: 4938.12
+            orderDate:
+              description: Date and time when the order has been operated
+              type: string
+              format: date-time
+              example: '2026-06-14T12:56:00.000Z'
+
+    Customer:
+      description: Customer that has requested the order
+      type: object
+      required:
+        - name
+        - surname1
+        - postalCode
+      properties:
+        name:
+          description: Base name of the customer
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: 'Juan Antonio'
+        surname1:
+          description: First surname of the customer
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: 'de la Rosa'
+        surname2:
+          description: Second surname of the customer
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: 'Ruiz'
+        postalCode:
+          description: Postal code of the customer
+          type: string
+          pattern: '^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$'
+          example: '28001'
+
+    OrderLine:
+      description: Order line used to define a bought product for the order
+      type: object
+      required:
+        - product
+        - quantity
+      properties:
+        product:
+          $ref: '#/components/schemas/Product'
+        quantity:
+          description: Number of products to be bought
+          type: integer
+          minimum: 1
+          maximum: 999
+          example: 2
+        discount:
+          description: Discount to be applied to the bought product
+          type: number
+          format: double
+          minimum: 0.0
+          maximum: 1.0
+          default: 0.0
+
+    Product:
+      description: Product to be included in the order
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          description: Name of the product
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: 'HUAWEI FreeBuds SE'
+        price:
+          description: Price of the product to be charged to the customer
+          type: number
+          format: double
+          minimum: 0.1
+          maximum: 999999.99
+          example: 17.89
