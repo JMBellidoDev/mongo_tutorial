@@ -5,12 +5,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import spring.tutorial.mongo.domain.model.Order;
 import spring.tutorial.mongo.domain.valueobject.Customer;
+import spring.tutorial.mongo.domain.valueobject.File;
 import spring.tutorial.mongo.domain.valueobject.OrderLine;
 import spring.tutorial.mongo.domain.valueobject.Product;
-import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.CustomerEntity;
-import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.OrderEntity;
-import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.OrderLineEntity;
-import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.ProductEntity;
+import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.*;
 
 import java.util.List;
 
@@ -34,6 +32,8 @@ public interface OrderEntityMapper {
     OrderLine convert(OrderLineEntity orderLineEntity);
 
     Product convert(ProductEntity productEntity);
+
+    File convert(FileEntity fileEntity);
 
     List<Order> convert(List<OrderEntity> orderEntities);
 }

@@ -6,22 +6,8 @@ info:
   version: 1.0.0
 
 servers:
-  - url: '{scheme}://{environment}:{port}/v1'
-    description: Deployment base path
-    variables:
-      scheme:
-        default: http
-        enum:
-          - http
-          - https
-      environment:
-        default: localhost
-        enum:
-          - localhost
-      port:
-        default: '8080'
-        enum:
-          - '8080'
+  - url: "http://localhost:8080"
+    description: Local base path
 
 tags:
   - name: orders
@@ -37,10 +23,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/GetOrdersResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     post:
       tags:
-        - users
+        - orders
       summary: Requests the creation of a new customer order
       operationId: createOrder
       requestBody:
@@ -48,11 +36,13 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/CreateOrderResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /orders/{id}:
     get:
       tags:
-        - users
+        - orders
       summary: Requests a stored order by its unique and identifying ID
       operationId: getUserById
       parameters:
@@ -62,6 +52,24 @@ paths:
           $ref: '#/components/responses/GetOrderByIdResponse'
         '404':
           $ref: '#/components/responses/NotFoundException'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /orders/{id}/files:
+    post:
+      tags:
+        - orders
+      summary: Uploads a new file in an invoice
+      operationId: uploadFile
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      requestBody:
+        $ref: '#/components/requestBodies/UploadFileRequest'
+      responses:
+        '204':
+          description: 'No content'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
 
@@ -81,6 +89,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateOrderRequest'
+    UploadFileRequest:
+      description: Request object used to upload a new file of an existing order
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/UploadFileRequest'
 
   responses:
     GetOrdersResponse:
@@ -117,7 +132,20 @@ components:
                       | Code              | Message                                 |
                       | ----------------- | --------------------------------------- |
                       | element_not_found | The searched element could not be found |
-
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ExceptionBase'
+              - type: object
+                properties:
+                  code:
+                    description: |-
+                      | Code                  | Message                             |
+                      | --------------------- | ----------------------------------- |
+                      | internal_server_error | An unexpected error has been thrown |
 
   schemas:
 
@@ -140,7 +168,7 @@ components:
       description: Order ID
       type: string
       example: "65f4f8b3e6f5e89a12345678"
-
+    
     
     # Requests
     CreateOrderRequest:
@@ -160,6 +188,16 @@ components:
           items:
             $ref: '#/components/schemas/OrderLine'
 
+    UploadFileRequest:
+      description: Request object used to upload a new file of an existing order
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: File to be uploaded
 
     # Responses
     GetOrdersResponse:

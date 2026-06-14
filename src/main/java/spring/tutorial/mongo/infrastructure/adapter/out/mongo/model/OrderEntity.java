@@ -16,5 +16,6 @@ public class OrderEntity {
     private String id;
     private CustomerEntity customer;
     private List<OrderLineEntity> orderLines;
+    private FileEntity file;
     private LocalDateTime createdAt;
 }

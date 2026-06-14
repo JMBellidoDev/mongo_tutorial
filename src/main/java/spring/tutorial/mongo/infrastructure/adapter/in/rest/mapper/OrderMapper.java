@@ -58,4 +58,8 @@ public interface OrderMapper {
     default OffsetDateTime convertDate(LocalDateTime createdAt) {
         return createdAt != null ? createdAt.atOffset(ZoneOffset.UTC) : null;
     }
+
+    @Mapping(source = ".", target = "totalPrice", qualifiedByName = "calculateTotalPrice")
+    @Mapping(source = "createdDate", target = "orderDate")
+    OrderResponseDto convertById(Order order);
 }

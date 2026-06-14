@@ -3,9 +3,9 @@ spring:
     name: mongo
   data:
     mongodb:
-      uri: mongodb+srv://curso_babel:KHGRPbbsJQO1ydWQ@mongodbtutorial.8jtrz8r.mongodb.net?appName=MongoDbTutorial
+      uri: mongodb+srv://curso_babel:<password>@mongodbtutorial.8jtrz8r.mongodb.net?appName=MongoDbTutorial
 logging:
   level:
-    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
-    org.mongodb.driver: DEBUG
-    org.springframework.data.mongodb.repository.query: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: ERROR
+    org.mongodb.driver: ERROR
+    org.springframework.data.mongodb.repository.query: ERROR
