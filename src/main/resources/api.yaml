@@ -56,6 +56,20 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
   /orders/{id}/files:
+    get:
+      tags:
+        - orders
+      summary: Requests the order invoice file of an order
+      operationId: getOrderFile
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetOrderFileResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundException'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     post:
       tags:
         - orders
@@ -116,6 +130,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OrderResponse'
+    GetOrderFileResponse:
+      description: Requests the order invoice file using its unique and identifying ID
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
 
     # Exceptions
     NotFoundException:
@@ -241,6 +262,10 @@ components:
               type: string
               format: date-time
               example: '2026-06-14T12:56:00.000Z'
+            hasInvoice:
+              description: Indicates if the bought products have created a new physical invoice to be recovered
+              type: boolean
+              example: true
 
     Customer:
       description: Customer that has requested the order

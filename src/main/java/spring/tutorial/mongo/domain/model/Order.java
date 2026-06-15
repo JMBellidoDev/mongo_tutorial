@@ -2,6 +2,7 @@ package spring.tutorial.mongo.domain.model;
 
 import lombok.Data;
 import spring.tutorial.mongo.domain.valueobject.Customer;
+import spring.tutorial.mongo.domain.valueobject.File;
 import spring.tutorial.mongo.domain.valueobject.OrderLine;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public class Order {
     private Customer customer;
     private List<OrderLine> orderLines;
     private LocalDateTime createdDate;
+    private File file;
 
     public Double getTotalPrice() {
         return orderLines.stream()

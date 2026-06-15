@@ -8,6 +8,7 @@ import org.mapstruct.Named;
 import spring.tutorial.mongo.application.command.CreateOrderCommand;
 import spring.tutorial.mongo.domain.model.Order;
 import spring.tutorial.mongo.domain.valueobject.Customer;
+import spring.tutorial.mongo.domain.valueobject.File;
 import spring.tutorial.mongo.domain.valueobject.OrderLine;
 import spring.tutorial.mongo.domain.valueobject.Product;
 
@@ -29,6 +30,7 @@ public interface OrderMapper {
 
     @Mapping(source = ".", target = "totalPrice", qualifiedByName = "calculateTotalPrice")
     @Mapping(source = "createdDate", target = "orderDate")
+    @Mapping(source = "file", target = "hasInvoice", qualifiedByName = "mapHasInvoice")
     CreateOrderResponseDto convert(@NonNull Order order);
 
     CustomerDto convert(Customer customer);
@@ -42,6 +44,11 @@ public interface OrderMapper {
         return order.getTotalPrice();
     }
 
+    @Named("mapHasInvoice")
+    default Boolean hasInvoice(File file) {
+        return file != null;
+    }
+
     default GetOrdersResponseDto convert(@NonNull List<Order> orders) {
         return new GetOrdersResponseDto()
                 .orders(orders
@@ -53,6 +60,7 @@ public interface OrderMapper {
 
     @Mapping(source = ".", target = "totalPrice", qualifiedByName = "calculateTotalPrice")
     @Mapping(source = "createdDate", target = "orderDate")
+    @Mapping(source = "file", target = "hasInvoice", qualifiedByName = "mapHasInvoice")
     OrderDto convertFromList(Order order);
 
     default OffsetDateTime convertDate(LocalDateTime createdAt) {
@@ -61,5 +69,6 @@ public interface OrderMapper {
 
     @Mapping(source = ".", target = "totalPrice", qualifiedByName = "calculateTotalPrice")
     @Mapping(source = "createdDate", target = "orderDate")
+    @Mapping(source = "file", target = "hasInvoice", qualifiedByName = "mapHasInvoice")
     OrderResponseDto convertById(Order order);
 }

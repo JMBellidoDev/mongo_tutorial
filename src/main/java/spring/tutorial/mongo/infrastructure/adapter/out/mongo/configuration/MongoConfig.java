@@ -15,6 +15,9 @@ public class MongoConfig {
     @Value(value = "${spring.data.mongodb.uri}")
     private String uri;
 
+    @Value(value = "${spring.data.mongodb.database}")
+    private String database;
+
     @Bean
     public MongoClient mongoClient() {
         return MongoClients.create(uri);
@@ -22,7 +25,7 @@ public class MongoConfig {
 
     @Bean
     public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
-        return new SimpleMongoClientDatabaseFactory(mongoClient, "shop");
+        return new SimpleMongoClientDatabaseFactory(mongoClient, database);
     }
 
     @Bean

@@ -7,6 +7,7 @@ import spring.tutorial.mongo.application.exception.UnexpectedError;
 import spring.tutorial.mongo.application.port.out.OrderManagerPort;
 import spring.tutorial.mongo.common.Adapter;
 import spring.tutorial.mongo.domain.model.Order;
+import spring.tutorial.mongo.domain.valueobject.File;
 import spring.tutorial.mongo.infrastructure.adapter.out.mongo.mapper.OrderEntityMapper;
 import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.FileEntity;
 import spring.tutorial.mongo.infrastructure.adapter.out.mongo.model.OrderEntity;
@@ -60,5 +61,11 @@ public class OrderManagerAdapter implements OrderManagerPort {
         } catch (Exception e) {
             throw new UnexpectedError(e.getMessage());
         }
+    }
+
+    @Override
+    public Optional<File> findFileByOrderId(String orderId) {
+        Optional<OrderEntity> fileByOrderId = orderRepository.findFileById(orderId);
+        return fileByOrderId.map(orderEntity -> orderEntityMapper.convert(orderEntity.getFile()));
     }
 }

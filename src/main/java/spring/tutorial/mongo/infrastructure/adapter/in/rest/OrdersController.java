@@ -7,16 +7,18 @@ import model.CreateOrderResponseDto;
 import model.GetOrdersResponseDto;
 import model.OrderResponseDto;
 import org.apache.http.HttpStatus;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import spring.tutorial.mongo.application.command.CreateOrderCommand;
 import spring.tutorial.mongo.application.command.UploadFileCommand;
-import spring.tutorial.mongo.application.port.in.CreateOrderPort;
-import spring.tutorial.mongo.application.port.in.GetAllOrdersPort;
-import spring.tutorial.mongo.application.port.in.GetOrderByIdPort;
-import spring.tutorial.mongo.application.port.in.UploadFilePort;
+import spring.tutorial.mongo.application.port.in.*;
 import spring.tutorial.mongo.domain.model.Order;
+import spring.tutorial.mongo.domain.valueobject.File;
 import spring.tutorial.mongo.infrastructure.adapter.in.rest.mapper.OrderMapper;
 
 import java.util.List;
@@ -32,6 +34,7 @@ public class OrdersController implements OrdersApi {
     private final GetAllOrdersPort getAllOrdersPort;
     private final GetOrderByIdPort getOrderByIdPort;
     private final UploadFilePort uploadFilePort;
+    private final GetFilePort getFilePort;
 
     @Override
     public ResponseEntity<CreateOrderResponseDto> createOrder(CreateOrderRequestDto createOrderRequest) {
@@ -66,5 +69,21 @@ public class OrdersController implements OrdersApi {
 
         uploadFilePort.apply(uploadFileCommand);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Resource> getOrderFile(String id) {
+        File file = getFilePort.apply(id);
+
+        ByteArrayResource resource = new ByteArrayResource(file.getContent());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getContentType()))
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        String.format("attachment; filename=\"%s\"", file.getFileName())
+                )
+                .contentLength(file.getContent().length)
+                .body(resource);
     }
 }
